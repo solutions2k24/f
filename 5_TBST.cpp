@@ -38,49 +38,39 @@ private:
         return root;
     }
 
-    // Helper function to perform inorder traversal and thread the tree
-    void threadInorder(Node* root, Node*& prev) {
+    // Helper function to convert BST to threaded BST
+    void convertToThreaded(Node* root, Node*& prev) {
         if (root == nullptr) {
             return;
         }
 
-        // Recursively thread the left subtree
-        threadInorder(root->left, prev);
+        // Recursively convert left subtree
+        convertToThreaded(root->left, prev);
 
-        // Thread the current node
+        // Thread current node
         if (prev != nullptr && prev->right == nullptr) {
             prev->right = root;
             prev->rightThread = true;
         }
+
         prev = root;
 
-        // Recursively thread the right subtree
-        threadInorder(root->right, prev);
+        // Recursively convert right subtree
+        convertToThreaded(root->right, prev);
     }
 
-public:
-    BinarySearchTree() {
-        root = nullptr;
-    }
-
-    // Function to insert a new node into the BST
-    void insert(int value) {
-        root = insertRecursive(root, value);
-    }
-
-    // Function to convert BST to inorder threaded BST
-    void convertToThreaded() {
-        Node* prev = nullptr;
-        threadInorder(root, prev);
-    }
-
-    // Function to perform inorder traversal of the threaded BST
-    void threadedInorderTraversal() {
+    // Function to perform threaded inorder traversal of the threaded BST
+    void threadedInorderTraversal(Node* root) {
         cout << "Inorder traversal (threaded): ";
+        if (root == nullptr) {
+            cout << endl;
+            return;
+        }
+
         Node* curr = root;
 
         // Find the leftmost node in the tree
-        while (curr != nullptr && curr->left != nullptr) {
+        while (curr->left != nullptr) {
             curr = curr->left;
         }
 
@@ -100,6 +90,27 @@ public:
 
         cout << endl;
     }
+
+public:
+    BinarySearchTree() {
+        root = nullptr;
+    }
+
+    // Function to insert a new node into the BST
+    void insert(int value) {
+        root = insertRecursive(root, value);
+    }
+
+    // Function to convert BST to threaded BST
+    void convertToThreaded() {
+        Node* prev = nullptr;
+        convertToThreaded(root, prev);
+    }
+
+    // Function to perform threaded inorder traversal of the threaded BST
+    void threadedInorderTraversal() {
+        threadedInorderTraversal(root);
+    }
 };
 
 int main() {
@@ -117,11 +128,15 @@ int main() {
     // Convert BST to threaded BST
     bst.convertToThreaded();
 
-    // Perform inorder traversal of the threaded BST
+    // Perform threaded inorder traversal of the threaded BST
     bst.threadedInorderTraversal();
 
     return 0;
 }
+
+
+
+
 
 // T.C.
 // Insertion: O(h) where h is the height of the BST
