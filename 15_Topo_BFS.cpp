@@ -5,65 +5,58 @@
 #include <iostream>
 #include <vector>
 #include <queue>
-#include <unordered_map>
-#include <algorithm>
+#include <stack>
 
 using namespace std;
 
 class Graph {
 private:
     int V; // Number of vertices
-    vector<vector<int>> adjList;
+    vector<vector<int>> adjMatrix;
 
 public:
     Graph(int vertices) : V(vertices) {
-        // Initialize adjacency list with V vectors
-        adjList.resize(V);
+        // Initialize adjacency matrix with size VxV and set all values to 0
+        adjMatrix.assign(V, vector<int>(V, 0));
     }
 
     // Add a directed edge from vertex u to vertex v
     void addEdge(int u, int v) {
-        adjList[u].push_back(v);
+        adjMatrix[u][v] = 1;
     }
 
-    // Topological Sorting using Kahn's algorithm
+    // Recursive function for topological sorting
+    void topologicalSortUtil(int v, vector<bool>& visited, stack<int>& stk) {
+        visited[v] = true;
+
+        // Recursively visit all adjacent vertices
+        for (int i = 0; i < V; ++i) {
+            if (adjMatrix[v][i] && !visited[i]) {
+                topologicalSortUtil(i, visited, stk);
+            }
+        }
+
+        // Push current vertex to stack after visiting all adjacent vertices
+        stk.push(v);
+    }
+
+    // Topological Sorting using recursion
     vector<int> topologicalSort() {
-        vector<int> inDegree(V, 0); // Store in-degrees of vertices
-        vector<int> topoOrder; // Store the topological order
-        queue<int> q;
+        vector<bool> visited(V, false);
+        stack<int> stk;
 
-        // Calculate in-degrees of all vertices
-        for (int u = 0; u < V; ++u) {
-            for (int v : adjList[u]) {
-                inDegree[v]++;
+        // Perform topological sorting for each vertex that has not been visited
+        for (int i = 0; i < V; ++i) {
+            if (!visited[i]) {
+                topologicalSortUtil(i, visited, stk);
             }
         }
 
-        // Enqueue vertices with zero in-degree
-        for (int u = 0; u < V; ++u) {
-            if (inDegree[u] == 0) {
-                q.push(u);
-            }
-        }
-
-        // Perform topological sorting
-        while (!q.empty()) {
-            int u = q.front();
-            q.pop();
-            topoOrder.push_back(u);
-
-            // Reduce in-degree of adjacent vertices
-            for (int v : adjList[u]) {
-                if (--inDegree[v] == 0) {
-                    q.push(v);
-                }
-            }
-        }
-
-        // Check if all vertices were visited
-        if (topoOrder.size() != V) {
-            cout << "Graph has a cycle. Topological sorting not possible." << endl;
-            return {};
+        // Collect vertices in topological order from stack
+        vector<int> topoOrder;
+        while (!stk.empty()) {
+            topoOrder.push_back(stk.top());
+            stk.pop();
         }
 
         return topoOrder;
@@ -83,8 +76,8 @@ public:
             q.pop();
             cout << u << " ";
 
-            for (int v : adjList[u]) {
-                if (!visited[v]) {
+            for (int v = 0; v < V; ++v) {
+                if (adjMatrix[u][v] && !visited[v]) {
                     visited[v] = true;
                     q.push(v);
                 }
@@ -98,7 +91,7 @@ int main() {
     // Create a directed acyclic graph (DAG) with 6 vertices
     Graph graph(6);
 
-    // Add directed edges to the graph
+    // Add directed edges to the graph using adjacency matrix
     graph.addEdge(5, 2);
     graph.addEdge(5, 0);
     graph.addEdge(4, 0);
@@ -121,3 +114,8 @@ int main() {
 
     return 0;
 }
+
+
+// Time Complexity:
+// Topological Sort: O(V^2)
+// BFS Traversal: O(V^2)
