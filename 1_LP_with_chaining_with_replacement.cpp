@@ -1,112 +1,150 @@
 // Consider the student database of N students and their marks. Make use of a hash table implementation to quickly insert and lookup students' PNR and marks. Implement collision handling techniques-  linear probing with chaining with replacement  
 #include <iostream>
 #include <vector>
-#include <list>
-#include <string>
-#include <algorithm>
-
 using namespace std;
 
-// Class representing a student with PNR and marks
-class Student {
-public:
-    string pnr;
+const int table_size = 10;
+
+struct Student{
+    int pnr;
     int marks;
-
-    Student(const string& pnr, int marks) : pnr(pnr), marks(marks) {}
 };
 
-// Hash Table class using linear probing with chaining and replacement
-class HashTable {
-private:
-    static const int TABLE_SIZE = 10; // Size of the hash table
-    vector<list<Student>> table; // Hash table using vector of linked lists
-
-    // Hash function to map PNRs to table indices
-    int hash(const string& pnr) const {
-        int hashValue = 0;
-        for (char c : pnr) {
-            hashValue = (hashValue * 31 + c) % TABLE_SIZE;
-        }
-        return hashValue;
-    }
-
+class Hashtable{
 public:
-    HashTable() : table(TABLE_SIZE) {}
+    vector<pair<int, int>> table[table_size];
 
-    // Insert a student into the hash table
-    void insert(const string& pnr, int marks) {
-        int index = hash(pnr);
-        list<Student>& chain = table[index];
-
-        // Check if PNR already exists in the hash table
-        auto it = find_if(chain.begin(), chain.end(), [&](const Student& student) {
-            return student.pnr == pnr;
-        });
-
-        if (it != chain.end()) {
-            // Student already exists, update marks
-            it->marks = marks;
-        } else {
-            // Insert new student into the chain
-            chain.push_back(Student(pnr, marks));
-        }
+    int hashfunction(int pnr){
+        return pnr % table_size;
     }
 
-    // Lookup a student's marks by PNR
-    int lookup(const string& pnr) {
-        int index = hash(pnr);
-        list<Student>& chain = table[index];
-
-        // Search for student in the chain
-        auto it = find_if(chain.begin(), chain.end(), [&](const Student& student) {
-            return student.pnr == pnr;
-        });
-
-        if (it != chain.end()) {
-            return it->marks;
-        } else {
-            // Student not found
-            return -1;
+    void insertlp(int pnr, int marks){
+        int index = hashfunction(pnr);
+        while(!table[index].empty()){
+            index = (index + 1) % table_size;
         }
+        table[index].push_back({pnr, marks});
+        cout<<"Student inserted successfully"<<endl;
     }
 
-    // Print the hash table
-    void printTable() {
-        for (int i = 0; i < TABLE_SIZE; ++i) {
-            cout << "Bucket " << i << ": ";
-            for (const auto& student : table[i]) {
-                cout << "(" << student.pnr << ", " << student.marks << ") ";
+    void deletelp(int pnr){
+        int index = hashfunction(pnr);
+        while(!table[index].empty()){
+            for(auto it = table[index].begin(); it != table[index].end(); ++it){
+                if(it->first == pnr){
+                    table[index].erase(it);
+                    cout<<"Student with PNR "<<pnr<<" deleted successfully"<<endl;
+                    return;
+                }
             }
-            cout << endl;
+            index = (index + 1) % table_size;
+        }
+        cout<<"Student with PNR "<<pnr<<" not found"<<endl;
+    }
+
+    void insertlpchainwithrep(int pnr, int marks){
+        int index = hashfunction(pnr);
+        if(!table[index].empty()){
+            int temppnr = table[index][0].first;
+            int tempmarks = table[index][0].second;
+            if(hashfunction(temppnr)==index){
+                table[index].push_back({pnr, marks});
+            }
+            else{
+                table[index][0].first = pnr;
+                table[index][0].second = marks;
+                while (!table[index].empty())
+                {
+                    index = (index+1) % table_size;
+                }
+                table[index].push_back({temppnr, tempmarks});
+            }
+        }
+        else
+        {
+            table[index].push_back({pnr, marks});
+        }
+        cout<<"student inserted successfully"<<endl;
+    }
+
+    int search(int pnr){
+        int index = hashfunction(pnr);
+        while(!table[index].empty()){
+            for(auto student : table[index]){
+                if(student.first == pnr){
+                    return student.second;
+                }
+            }
+            index = (index + 1) % table_size;
+        }
+        return -1;
+    }
+
+    void display(){
+        for(int i = 0; i < table_size; i++){
+            cout<< "Bucket "<<i<<" : ";
+            for(auto it : table[i]){
+                cout<<" ( "<<it.first<<" , "<<it.second<<" ) ";
+            }
+            cout<<endl;
         }
     }
 };
 
-int main() {
-    HashTable hashTable;
-
-    // Insert students into the hash table
-    hashTable.insert("A123", 85);
-    hashTable.insert("B456", 92);
-    hashTable.insert("C789", 78);
-    hashTable.insert("D012", 88);
-    hashTable.insert("E345", 95);
-    hashTable.insert("F678", 82);
-    hashTable.insert("G901", 90);
-
-    // Lookup student marks by PNR
-    string pnrToLookup = "E345";
-    int marks = hashTable.lookup(pnrToLookup);
-    if (marks != -1) {
-        cout << "Marks of student with PNR " << pnrToLookup << ": " << marks << endl;
-    } else {
-        cout << "Student with PNR " << pnrToLookup << " not found." << endl;
-    }
-
-    // Print the hash table
-    cout << "Hash Table:" << endl;
-    hashTable.printTable();
-
+int main(){
+    Hashtable t;
+    int choice;
+    int pnr;
+    int marks;
+    do {
+        cout<<"\nMenu : \n";
+        cout<<"1 Insert using linear probing\n";
+        cout<<"2 Insert using Linear Probing with Chaining with Replacement\n";
+        cout<<"3 Search a student\n";
+        cout<<"4 Delete a student\n";
+        cout<<"5 Display table\n";
+        cout<<"6 Exit\n";
+        cout<<"Enter choice : ";
+        cin>>choice;
+        switch(choice){
+            case 1:
+                {cout<<"Enter PNR and marks : ";
+                cin>>pnr>>marks;
+                t.insertlp(pnr, marks);
+                break;}
+            case 2:
+                {cout<<"Enter PNR and marks : ";
+                cin>>pnr>>marks;
+                t.insertlpchainwithrep(pnr, marks);
+                break;}
+            case 3:
+                {cout<<"Enter PNR to search : ";
+                cin>>pnr;
+                int found = t.search(pnr);
+                if(found == -1){
+                    cout<<"No record found"<<endl;
+                }
+                else{
+                    cout<<"Marks of student with PNR "<<pnr <<" is "<<found<<endl;
+                }
+                break;}
+            case 4:
+                {cout<<"Enter PNR to delete : ";
+                cin>>pnr;
+                t.deletelp(pnr);
+                break;}
+            case 5:
+                {cout<<"HASHTABLE : "<<endl;
+                t.display();
+                break;}
+            case 6:
+                {cout<<"Exiting..."<<endl;
+                break;}
+            default:
+                cout<<"Enter a valid choice"<<endl;
+        }
+    }while(choice != 6);
     return 0;
 }
+
+// Time Complexity : O(N) for searching, O(1) for insertion and deletion
