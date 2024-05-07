@@ -229,14 +229,12 @@ public:
                 s.push(curr);
                 curr = curr->left;
             }
-
             curr = s.top();
             s.pop();
             cout << curr->data << " ";
 
             curr = curr->right;
         }
-
         cout << endl;
     }
 
@@ -304,7 +302,7 @@ public:
     ~BinarySearchTree() {
         // Clean up memory by deleting all nodes in the tree
         deleteTree(root);
-    }
+    }   
 
 private:
     void deleteTree(Node* root) {
@@ -363,7 +361,6 @@ int main() {
     Node* constructedRoot = bst.buildTreeFromInorderAndPreorder(inorder, preorder);
     cout << "Inorder traversal of constructed tree: ";
     bst.inorder();
-    cout << endl;
 
     // 7. Create a clone of the original tree
     BinarySearchTree clonedTree;
