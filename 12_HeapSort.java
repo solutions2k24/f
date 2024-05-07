@@ -1,113 +1,112 @@
-public class SortAlgorithms {
-    // Heap Sort
-    public static class HeapSort {
-        public void sort(int arr[]) {
-            int n = arr.length;
+public class Heapsort {
 
-            // Build heap (rearrange array)
-            for (int i = n / 2 - 1; i >= 0; i--)
-                heapify(arr, n, i);
-
-            // One by one extract an element from heap
-            for (int i = n - 1; i > 0; i--) {
-                // Move current root to end
-                int temp = arr[0];
-                arr[0] = arr[i];
-                arr[i] = temp;
-
-                // call max heapify on the reduced heap
-                heapify(arr, i, 0);
-            }
+    // Function to perform heapsort to sort marks in ascending order
+    public static void heapsort(int[] marks) {
+        if (marks == null || marks.length <= 1) {
+            return;
         }
 
-        // To heapify a subtree rooted with node i which is an index in arr[]
-        void heapify(int arr[], int n, int i) {
-            int largest = i; // Initialize largest as root
-            int l = 2 * i + 1; // left = 2*i + 1
-            int r = 2 * i + 2; // right = 2*i + 2
+        // Build max heap
+        buildMaxHeap(marks);
 
-            // If left child is larger than root
-            if (l < n && arr[l] > arr[largest])
-                largest = l;
-
-            // If right child is larger than largest so far
-            if (r < n && arr[r] > arr[largest])
-                largest = r;
-
-            // If largest is not root
-            if (largest != i) {
-                int swap = arr[i];
-                arr[i] = arr[largest];
-                arr[largest] = swap;
-
-                // Recursively heapify the affected sub-tree
-                heapify(arr, n, largest);
-            }
-        }
-
-        // Function to print array of size n
-        public void printArray(int arr[]) {
-            int n = arr.length;
-            for (int i = 0; i < n; ++i)
-                System.out.print(arr[i] + " ");
-            System.out.println();
+        // Perform heapsort
+        int n = marks.length;
+        for (int i = n - 1; i > 0; i--) {
+            // Swap root (maximum element) with the last element
+            swap(marks, 0, i);
+            // Heapify the reduced heap
+            heapify(marks, i, 0);
         }
     }
 
-    // Shell Sort
-    public static class ShellSort {
-        public void sort(int arr[]) {
-            int n = arr.length;
-
-            // Start with a big gap, then reduce the gap
-            for (int gap = n / 2; gap > 0; gap /= 2) {
-                // Do a gapped insertion sort for this gap size.
-                // The first gap elements arr[0..gap-1] are already in gapped order
-                // keep adding one more element until the entire array is gap sorted
-                for (int i = gap; i < n; i += 1) {
-                    // add arr[i] to the elements that have been gap sorted
-                    // save arr[i] in temp and make a hole at position i
-                    int temp = arr[i];
-
-                    // shift earlier gap-sorted elements up until the correct location for arr[i] is found
-                    int j;
-                    for (j = i; j >= gap && arr[j - gap] > temp; j -= gap)
-                        arr[j] = arr[j - gap];
-
-                    // put temp (the original arr[i]) in its correct location
-                    arr[j] = temp;
-                }
-            }
-        }
-
-        // Function to print array of size n
-        public void printArray(int arr[]) {
-            int n = arr.length;
-            for (int i = 0; i < n; ++i)
-                System.out.print(arr[i] + " ");
-            System.out.println();
+    // Function to build a max heap
+    private static void buildMaxHeap(int[] arr) {
+        int n = arr.length;
+        for (int i = n / 2 - 1; i >= 0; i--) {
+            heapify(arr, n, i);
         }
     }
 
-    public static void main(String args[]) {
-        // Heap Sort
-        int arr1[] = {12, 11, 13, 5, 6, 7};
-        HeapSort heapSort = new HeapSort();
-        System.out.println("Array before sorting:");
-        heapSort.printArray(arr1);
-        heapSort.sort(arr1);
-        System.out.println("Array after Heap Sort:");
-        heapSort.printArray(arr1);
+    // Function to heapify a subtree rooted at given index
+    private static void heapify(int[] arr, int n, int i) {
+        int largest = i; // Initialize largest as root
+        int left = 2 * i + 1; // Left child
+        int right = 2 * i + 2; // Right child
 
+        // If left child is larger than root
+        if (left < n && arr[left] > arr[largest]) {
+            largest = left;
+        }
+
+        // If right child is larger than largest so far
+        if (right < n && arr[right] > arr[largest]) {
+            largest = right;
+        }
+
+        // If largest is not root
+        if (largest != i) {
+            swap(arr, i, largest);
+            // Recursively heapify the affected sub-tree
+            heapify(arr, n, largest);
+        }
+    }
+
+    // Function to swap two elements in an array
+    private static void swap(int[] arr, int i, int j) {
+        int temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+
+    // Function to find the maximum element in an array
+    public static int findMax(int[] arr) {
+        if (arr == null || arr.length == 0) {
+            throw new IllegalArgumentException("Array is empty or null");
+        }
+
+        int max = arr[0];
+        for (int num : arr) {
+            if (num > max) {
+                max = num;
+            }
+        }
+        return max;
+    }
+
+    // Function to find the minimum element in an array
+    public static int findMin(int[] arr) {
+        if (arr == null || arr.length == 0) {
+            throw new IllegalArgumentException("Array is empty or null");
+        }
+
+        int min = arr[0];
+        for (int num : arr) {
+            if (num < min) {
+                min = num;
+            }
+        }
+        return min;
+    }
+
+    public static void main(String[] args) {
+        int[] marks = {85, 92, 78, 60, 95, 87, 70};
+
+        // Perform heapsort to sort marks in ascending order
+        heapsort(marks);
+
+        // Display sorted marks
+        System.out.println("Sorted Marks (Ascending Order):");
+        for (int mark : marks) {
+            System.out.print(mark + " ");
+        }
         System.out.println();
 
-        // Shell Sort
-        int arr2[] = {12, 34, 54, 2, 3};
-        ShellSort shellSort = new ShellSort();
-        System.out.println("Array before sorting:");
-        shellSort.printArray(arr2);
-        shellSort.sort(arr2);
-        System.out.println("Array after Shell Sort:");
-        shellSort.printArray(arr2);
+        // Find maximum and minimum marks
+        int max = findMax(marks);
+        int min = findMin(marks);
+        System.out.println("Maximum Mark: " + max);
+        System.out.println("Minimum Mark: " + min);
     }
 }
+
+// Time Complexity: O(n log n)
